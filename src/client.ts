@@ -27,13 +27,13 @@ export class ValueSerpClient {
     return url.toString();
   }
 
-  private async makeRequest(endpoint: string, params: Record<string, any>): Promise<ValueSerpResponse> {
+  private async makeRequest(endpoint: string, params: Record<string, any>): Promise<ValueSerpResponse | string> {
     const url = this.buildUrl(endpoint, params);
     
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        'Accept': params.output === 'csv' ? 'text/csv' : 'application/json',
         'User-Agent': 'ValueSerp-MCP-Server/1.0.0'
       }
     });
@@ -43,23 +43,28 @@ export class ValueSerpClient {
       throw new Error(`ValueSerp API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
+    // Return CSV as string if output=csv, otherwise parse JSON
+    if (params.output === 'csv') {
+      return await response.text();
+    }
+    
     const data = await response.json() as ValueSerpResponse;
     return data;
   }
 
-  async search(params: SearchParams): Promise<ValueSerpResponse> {
+  async search(params: SearchParams): Promise<ValueSerpResponse | string> {
     return this.makeRequest('/search', params);
   }
 
-  async searchNews(params: NewsSearchParams): Promise<ValueSerpResponse> {
+  async searchNews(params: NewsSearchParams): Promise<ValueSerpResponse | string> {
     return this.makeRequest('/search', params);
   }
 
-  async searchImages(params: ImageSearchParams): Promise<ValueSerpResponse> {
+  async searchImages(params: ImageSearchParams): Promise<ValueSerpResponse | string> {
     return this.makeRequest('/search', params);
   }
 
-  async searchVideos(params: VideoSearchParams): Promise<ValueSerpResponse> {
+  async searchVideos(params: VideoSearchParams): Promise<ValueSerpResponse | string> {
     return this.makeRequest('/search', params);
   }
 }
