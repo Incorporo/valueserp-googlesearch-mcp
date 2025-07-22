@@ -30,11 +30,64 @@ This MCP server provides the following tools:
 
 ## Configuration
 
+### Environment Variable
+
 Set your ValueSerp API key as an environment variable:
 
 ```bash
 export VALUESERP_API_KEY=your_api_key_here
 ```
+
+### MCP Server Configuration
+
+To use this server with Claude Desktop or other MCP clients, add it to your MCP configuration:
+
+#### Claude Desktop Configuration
+
+Add the following to your Claude Desktop configuration file:
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows:** `%APPDATA%/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "valueserp": {
+      "command": "node",
+      "args": ["/path/to/valueserp-mcp/dist/server.js"],
+      "env": {
+        "VALUESERP_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Alternative: Using npm start
+
+If you prefer to use the npm script:
+
+```json
+{
+  "mcpServers": {
+    "valueserp": {
+      "command": "npm",
+      "args": ["start"],
+      "cwd": "/path/to/valueserp-mcp",
+      "env": {
+        "VALUESERP_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+#### Other MCP Clients
+
+For other MCP clients, configure them to run this server using:
+- **Command:** `node dist/server.js` (or `npm start`)
+- **Working Directory:** Path to this project
+- **Environment:** `VALUESERP_API_KEY=your_api_key_here`
 
 ## Usage
 
