@@ -168,6 +168,10 @@ Search for "latest AI news" in the US:
 
 For complete API documentation and parameter details, visit: https://docs.valueserp.com/
 
+## More Information
+
+For a detailed guide on implementing and using the ValueSerp MCP server, see: [ValueSerp MCP Server: Real-time Search for Claude Without the Marketing BS](https://www.incorpo.ro/en-us/articles/valueserp-mcp-server-real-time-search-for-claude-without-the-marketing-bs/)
+
 ## Error Handling
 
 The server includes comprehensive error handling and parameter validation:
