@@ -8,3 +8,4 @@ test_*.js
 test-*.js
 coverage/
 .nyc_output/
+.claude/

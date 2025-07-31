@@ -175,13 +175,47 @@ const videoSearchParamsSchema = z.object({
   process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
 });
 
+const placesSearchParamsSchema = z.object({
+  q: z.string().describe("Places search query (required) - keyword for local search"),
+  output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: places_results.position, places_results.data_id, places_results.data_cid, places_results.title, places_results.link, places_results.sponsored, places_results.snippet, places_results.address, places_results.phone, places_results.rating, places_results.reviews, places_results.unclaimed, places_results.category, places_results.gps_coordinates.latitude, places_results.gps_coordinates.longitude, places_results.permanently_closed, places_results.page, local_results.position, local_results.link, local_results.address, local_results.block_position, local_results.gps_coordinates.latitude, local_results.gps_coordinates.longitude, local_results.title, local_results.image, local_results.rating, local_results.reviews, local_results.type, local_results.phone"),
+  
+  // Location and domain parameters - more important for Places search
+  location: z.string().optional().describe("Geographic location for places search. Text location name or latitude/longitude coordinates (lat:43.437677,lon:-3.8392765). Determines the geographic search area"),
+  location_auto: z.boolean().optional().describe("Auto-update domain/gl/hl from location (default: true)"),
+  uule: z.string().optional().describe("Custom Google UULE parameter - automatically generated when using location parameter"),
+  google_domain: z.string().optional().describe("Google domain to use (default: google.com)"),
+  gl: z.string().optional().describe("Country code (default: us)"),
+  hl: z.string().optional().describe("Language code (default: en)"),
+  lr: z.string().optional().describe("Limit results by language"),
+  cr: z.string().optional().describe("Limit results by country"),
+  
+  // Search behavior
+  safe: z.enum(["active", "off"]).optional().describe("Safe search setting"),
+  nfpr: z.number().min(0).max(1).optional().describe("Exclude auto-corrected results (1) or include (0). Default: 0"),
+  filter: z.enum(["0", "1"]).optional().describe("Enable/disable Similar Results filter"),
+  
+  // Pagination - limited for Places
+  num: z.number().min(1).max(20).optional().describe("Number of places results per page (maximum 20 for Places results)"),
+  page: z.number().min(1).optional().describe("Page number (default: 1)"),
+  max_page: z.number().min(1).optional().describe("Get multiple pages in one request"),
+  
+  // Advanced
+  tbs: z.string().optional().describe("Custom tbs parameter"),
+  order_online: z.boolean().optional().describe("Returns pickup and delivery information for restaurant businesses. Costs 2 credits instead of 1"),
+  
+  // MCP Image Processing
+  process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
+});
+
 export function registerSearchTools(server: McpServer, client: ValueSerpClient) {
   // Default CSV fields for each search type
   const DEFAULT_CSV_FIELDS = {
     search: 'organic_results.position,organic_results.title,organic_results.link,organic_results.snippet',
     news: 'news_results.title,news_results.source,news_results.date,news_results.link,news_results.snippet',
     images: 'image_results.position,image_results.title,image_results.image,image_results.link,image_results.source.name',
-    videos: 'video_results.position,video_results.title,video_results.link,video_results.length,video_results.source'
+    videos: 'video_results.position,video_results.title,video_results.link,video_results.length,video_results.source',
+    places: 'places_results.position,places_results.title,places_results.address,places_results.phone,places_results.rating,places_results.reviews,local_results.title,local_results.address,local_results.rating,local_results.reviews'
   };
 
   // Google Search Tool
@@ -278,6 +312,37 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.searchVideos(params);
+        const content = formatMCPResponse(result, params.process_images !== false);
+        
+        return {
+          content
+        };
+      } catch (error: any) {
+        return {
+          content: [{ type: "text", text: `Error: ${error.message}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // Google Places Search Tool
+  server.tool(
+    "google_places_search",
+    placesSearchParamsSchema.shape,
+    async (args: any, _extra: any) => {
+      try {
+        const params = { 
+          output: 'csv', 
+          search_type: 'places',
+          ...args 
+        };
+        
+        if (params.output === 'csv' && !params.csv_fields) {
+          params.csv_fields = DEFAULT_CSV_FIELDS.places;
+        }
+        
+        const result = await client.searchPlaces(params);
         const content = formatMCPResponse(result, params.process_images !== false);
         
         return {

@@ -53,6 +53,10 @@ export interface VideoSearchParams extends Omit<SearchParams, 'include_ai_overvi
   search_type: 'videos';
 }
 
+export interface PlacesSearchParams extends Omit<SearchParams, 'include_ai_overview' | 'web_filter' | 'flatten_results' | 'include_answer_box' | 'ads_optimized' | 'fields' | 'knowledge_graph_id' | 'time_period' | 'time_period_min' | 'time_period_max'> {
+  search_type: 'places';
+}
+
 export interface ValueSerpResponse {
   search_metadata: {
     id: string;
@@ -104,5 +108,42 @@ export interface ValueSerpResponse {
     published_date: string;
     views: string;
     snippet?: string;
+  }>;
+  places_results?: Array<{
+    position: number;
+    data_id?: string;
+    data_cid?: string;
+    title: string;
+    link: string;
+    sponsored?: boolean;
+    snippet?: string;
+    address?: string;
+    phone?: string;
+    rating?: number;
+    reviews?: number;
+    unclaimed?: boolean;
+    category?: string;
+    gps_coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+    permanently_closed?: boolean;
+    page?: number;
+  }>;
+  local_results?: Array<{
+    position: number;
+    link: string;
+    address?: string;
+    block_position?: number;
+    gps_coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+    title: string;
+    image?: string;
+    rating?: number;
+    reviews?: number;
+    type?: string;
+    phone?: string;
   }>;
 }

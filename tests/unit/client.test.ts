@@ -182,6 +182,61 @@ describe('ValueSerpClient', () => {
     });
   });
 
+  describe('searchPlaces', () => {
+    it('should make a places search request with search_type=places', async () => {
+      const mockResponse = { 
+        search_metadata: { status: 'Success' },
+        places_results: [{ title: 'Coffee Shop', rating: 4.5 }],
+        local_results: [{ title: 'Local Business' }]
+      };
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const params = { 
+        q: 'coffee shops', 
+        search_type: 'places' as const,
+        location: 'San Francisco, CA',
+        num: 20
+      };
+      const result = await client.searchPlaces(params);
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const url = new URL(fetchCall[0]);
+      
+      expect(url.searchParams.get('search_type')).toBe('places');
+      expect(url.searchParams.get('location')).toBe('San Francisco, CA');
+      expect(url.searchParams.get('num')).toBe('20');
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle location coordinates format', async () => {
+      const mockResponse = { 
+        search_metadata: { status: 'Success' },
+        places_results: []
+      };
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const params = { 
+        q: 'restaurants', 
+        search_type: 'places' as const,
+        location: 'lat:43.437677,lon:-3.8392765'
+      };
+      await client.searchPlaces(params);
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const url = new URL(fetchCall[0]);
+      
+      expect(url.searchParams.get('location')).toBe('lat:43.437677,lon:-3.8392765');
+    });
+  });
+
   describe('makeRequest with retries', () => {
     it('should handle rate limiting with retry', async () => {
       const mockResponse = { search_metadata: { status: 'Success' } };

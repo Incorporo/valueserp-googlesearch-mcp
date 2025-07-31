@@ -292,15 +292,124 @@ describe('MCP Server Tools Integration', () => {
     });
   });
 
+  describe('google_places_search tool', () => {
+    it('should execute places search with location', async () => {
+      const mockResponse = {
+        search_metadata: { status: 'Success' },
+        places_results: [
+          {
+            position: 1,
+            title: 'Best Coffee Shop',
+            address: '123 Main St, San Francisco, CA',
+            rating: 4.5,
+            reviews: 250,
+            phone: '+1 415-555-0123'
+          }
+        ],
+        local_results: [
+          {
+            title: 'Local Cafe',
+            address: '456 Market St',
+            rating: 4.2
+          }
+        ]
+      };
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const tools = (server as any)._toolHandlers;
+      const placesTool = tools.get('google_places_search');
+
+      const result = await placesTool({
+        q: 'coffee shops',
+        location: 'San Francisco, CA',
+        num: 20
+      }, {});
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const url = new URL(fetchCall[0]);
+      
+      expect(url.searchParams.get('search_type')).toBe('places');
+      expect(url.searchParams.get('location')).toBe('San Francisco, CA');
+      expect(url.searchParams.get('num')).toBe('20');
+      
+      const resultData = JSON.parse(result.content[0].text);
+      expect(resultData).toEqual(mockResponse);
+    });
+
+    it('should validate places-specific parameters', async () => {
+      const tools = (server as any)._toolHandlers;
+      const placesTool = tools.get('google_places_search');
+
+      // Test max results limit
+      const mockResponse = {
+        search_metadata: { status: 'Success' },
+        places_results: []
+      };
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      await placesTool({
+        q: 'restaurants',
+        num: 20, // Max for places
+        order_online: true
+      }, {});
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const url = new URL(fetchCall[0]);
+      
+      expect(url.searchParams.get('num')).toBe('20');
+      expect(url.searchParams.get('order_online')).toBe('true');
+    });
+
+    it('should handle coordinate-based location search', async () => {
+      const mockResponse = {
+        search_metadata: { status: 'Success' },
+        places_results: [{
+          title: 'Restaurant',
+          gps_coordinates: {
+            latitude: 43.437677,
+            longitude: -3.8392765
+          }
+        }]
+      };
+      
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      const tools = (server as any)._toolHandlers;
+      const placesTool = tools.get('google_places_search');
+
+      const result = await placesTool({
+        q: 'restaurants',
+        location: 'lat:43.437677,lon:-3.8392765'
+      }, {});
+
+      const fetchCall = mockFetch.mock.calls[0];
+      const url = new URL(fetchCall[0]);
+      
+      expect(url.searchParams.get('location')).toBe('lat:43.437677,lon:-3.8392765');
+    });
+  });
+
   describe('Tool Registration', () => {
-    it('should register all four tools', () => {
+    it('should register all five tools', () => {
       const tools = (server as any)._toolHandlers;
       
       expect(tools.has('google_search')).toBe(true);
       expect(tools.has('google_news_search')).toBe(true);
       expect(tools.has('google_images_search')).toBe(true);
       expect(tools.has('google_videos_search')).toBe(true);
-      expect(tools.size).toBe(4);
+      expect(tools.has('google_places_search')).toBe(true);
+      expect(tools.size).toBe(5);
     });
 
     it('should have proper tool schemas', () => {

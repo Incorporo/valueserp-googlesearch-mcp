@@ -41,6 +41,7 @@ Transform Claude AI into a powerful search engine with real-time access to Googl
 - **`google_news_search`** - Latest news with sorting
 - **`google_images_search`** - Visual search with filters
 - **`google_videos_search`** - Video discovery
+- **`google_places_search`** - Local business and place discovery
 
 </td>
 <td width="50%">
@@ -184,6 +185,20 @@ Add to your Claude Desktop configuration:
 }
 ```
 
+### **Places & Local Business Search**
+
+```json
+{
+  "tool": "google_places_search",
+  "parameters": {
+    "q": "coffee shops",
+    "location": "San Francisco, CA",
+    "num": 20,
+    "process_images": true
+  }
+}
+```
+
 ---
 
 ## ⚙️ **Configuration Options**
@@ -220,6 +235,15 @@ Add to your Claude Desktop configuration:
 | `images_size` | string | `large`, `medium`, `icon` |
 | `images_type` | string | `clipart`, `line_drawing`, `gif` |
 | `images_usage` | string | Usage rights filter |
+
+### **Places-Specific Parameters**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `location` | string | Geographic location for places search. Text location name or lat:lon coordinates |
+| `num` | number | Number of places results per page (maximum 20) |
+| `order_online` | boolean | Returns pickup/delivery info for restaurants (costs 2 credits) |
+| `nfpr` | number | Exclude auto-corrected results (1) or include (0) |
 
 </details>
 
@@ -263,6 +287,15 @@ video_results.length, video_results.source, video_results.date,
 video_results.snippet, search_information.total_results
 ```
 
+### **Places Search Fields**
+```
+places_results.position, places_results.title, places_results.address,
+places_results.phone, places_results.rating, places_results.reviews,
+places_results.category, places_results.gps_coordinates.latitude,
+places_results.gps_coordinates.longitude, local_results.title,
+local_results.address, local_results.rating, local_results.reviews
+```
+
 </details>
 
 ---
@@ -285,6 +318,7 @@ npm test tests/integration/
 
 **Test Coverage:**
 - ✅ **56 tests passing** across unit and integration suites
+- ✅ **5 search tools** - Web, News, Images, Videos, and Places search
 - ✅ **Image processing** - 24 comprehensive tests
 - ✅ **API validation** - Parameter validation and error handling
 - ✅ **Integration testing** - Real-world scenario validation

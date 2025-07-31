@@ -99,11 +99,12 @@ describe('ValueSerpMcpServer', () => {
       const serverInstance = (server as any).server;
       const tools = serverInstance._tools;
       
-      expect(tools.size).toBe(4);
+      expect(tools.size).toBe(5);
       expect(tools.has('google_search')).toBe(true);
       expect(tools.has('google_news_search')).toBe(true);
       expect(tools.has('google_images_search')).toBe(true);
       expect(tools.has('google_videos_search')).toBe(true);
+      expect(tools.has('google_places_search')).toBe(true);
     });
   });
 
