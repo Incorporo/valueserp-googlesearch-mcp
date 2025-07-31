@@ -9,7 +9,7 @@ const searchParamsSchema = z.object({
   
   // Output format (our addition for CSV support)
   output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
-  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: organic_results.position, organic_results.title, organic_results.link, organic_results.snippet, organic_results.displayed_link, organic_results.cached_page_link, organic_results.date, organic_results.rating, organic_results.reviews, search_information.total_results, ads.position, ads.title, ads.link, knowledge_graph.title, knowledge_graph.type, local_results.title, local_results.address, related_questions.question, related_questions.answer"),
   
   // Core optional parameters
   include_ai_overview: z.boolean().optional().describe("Adds Google's AI Overview content to the response (costs 1 additional credit if returned)"),
@@ -53,7 +53,7 @@ const searchParamsSchema = z.object({
 const newsSearchParamsSchema = z.object({
   q: z.string().describe("News search query (required)"),
   output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
-  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: news_results.position, news_results.title, news_results.domain, news_results.link, news_results.source, news_results.date, news_results.snippet, search_information.total_results, related_questions.question, related_questions.answer"),
   
   // Location and domain parameters
   location: z.string().optional().describe("Geographic location for news search"),
@@ -91,7 +91,7 @@ const newsSearchParamsSchema = z.object({
 const imageSearchParamsSchema = z.object({
   q: z.string().describe("Image search query (required)"),
   output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
-  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: image_results.position, image_results.title, image_results.width, image_results.height, image_results.image, image_results.image_type, image_results.link, image_results.source.link, image_results.source.name, image_results.description, image_results.rating, image_results.reviews, image_results.brand, image_results.in_stock"),
   
   // Location and domain parameters
   location: z.string().optional().describe("Geographic location for image search"),
@@ -109,6 +109,11 @@ const imageSearchParamsSchema = z.object({
   images_size: z.enum(["large", "medium", "icon"]).optional().describe("Filter by image size"),
   images_type: z.enum(["clipart", "line_drawing", "gif"]).optional().describe("Filter by image type"),
   images_usage: z.enum(["non_commercial_reuse_with_modification", "non_commercial_reuse"]).optional().describe("Filter by usage rights"),
+  
+  // Pagination parameters
+  num: z.number().min(1).max(100).optional().describe("Number of image results per page"),
+  page: z.number().min(1).optional().describe("Page number for pagination"),
+  max_page: z.number().min(1).optional().describe("Get multiple pages in one request"),
   
   // Time filtering
   time_period: z.enum(["last_hour", "last_day", "last_week", "last_month", "last_year", "custom"]).optional().describe("Filter results by when they were published"),
@@ -128,7 +133,7 @@ const imageSearchParamsSchema = z.object({
 const videoSearchParamsSchema = z.object({
   q: z.string().describe("Video search query (required)"),
   output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
-  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: video_results.position, video_results.title, video_results.domain, video_results.link, video_results.displayed_link, video_results.date, video_results.snippet, video_results.length, search_information.total_results"),
   
   // Location and domain parameters
   location: z.string().optional().describe("Geographic location for video search"),
@@ -165,8 +170,8 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
   const DEFAULT_CSV_FIELDS = {
     search: 'organic_results.position,organic_results.title,organic_results.link,organic_results.snippet',
     news: 'news_results.title,news_results.source,news_results.date,news_results.link,news_results.snippet',
-    images: 'images_results.title,images_results.original,images_results.thumbnail,images_results.source',
-    videos: 'video_results.title,video_results.link,video_results.duration,video_results.source,video_results.date,video_results.views'
+    images: 'image_results.position,image_results.title,image_results.image,image_results.link,image_results.source.name',
+    videos: 'video_results.position,video_results.title,video_results.link,video_results.length,video_results.source'
   };
 
   // Google Search Tool
