@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ValueSerpClient } from './client.js';
+import { formatMCPResponse, ContentBlock } from './imageProcessor.js';
 
 // Complete search parameters schema with all ValueSerp options
 const searchParamsSchema = z.object({
@@ -47,7 +48,10 @@ const searchParamsSchema = z.object({
   flatten_results: z.boolean().optional().describe("Flattens inline_videos, inline_images, inline_tweets, top_stories and local_results inline with organic_results"),
   include_answer_box: z.boolean().optional().describe("Include the answer box (featured snippet) in the organic_results array as the first result"),
   ads_optimized: z.boolean().optional().describe("Optimize the rate that ads are returned in the search results"),
-  fields: z.array(z.string()).optional().describe("Selection of top-level objects to parse (e.g. ['organic_results', 'top_sights']). If not provided, all fields are parsed")
+  fields: z.array(z.string()).optional().describe("Selection of top-level objects to parse (e.g. ['organic_results', 'top_sights']). If not provided, all fields are parsed"),
+  
+  // MCP Image Processing
+  process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
 });
 
 const newsSearchParamsSchema = z.object({
@@ -68,6 +72,9 @@ const newsSearchParamsSchema = z.object({
   // News-specific parameters
   time_period: z.enum(["last_hour", "last_day", "last_week", "last_month", "last_year", "custom"]).optional().describe("Filter results by when they were published"),
   time_period_min: z.string().optional().describe("Minimum time when time_period is custom. Format: MM/DD/YYYY"),
+  
+  // MCP Image Processing
+  process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)"),
   time_period_max: z.string().optional().describe("Maximum time when time_period is custom. Format: MM/DD/YYYY"),
   sort_by: z.enum(["relevance", "date"]).optional().describe("Sort results by relevance or date"),
   show_duplicates: z.boolean().optional().describe("Show duplicate articles (requires sort_by=date)"),
@@ -162,7 +169,10 @@ const videoSearchParamsSchema = z.object({
   
   // Advanced
   tbs: z.string().optional().describe("Custom tbs parameter"),
-  fields: z.array(z.string()).optional().describe("Select top-level objects to parse")
+  fields: z.array(z.string()).optional().describe("Select top-level objects to parse"),
+  
+  // MCP Image Processing
+  process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
 });
 
 export function registerSearchTools(server: McpServer, client: ValueSerpClient) {
@@ -187,10 +197,10 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.search(params);
-        const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        const content = formatMCPResponse(result, params.process_images !== false);
         
         return {
-          content: [{ type: "text", text: resultText }]
+          content
         };
       } catch (error: any) {
         return {
@@ -214,10 +224,10 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.searchNews(params);
-        const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        const content = formatMCPResponse(result, params.process_images !== false);
         
         return {
-          content: [{ type: "text", text: resultText }]
+          content
         };
       } catch (error: any) {
         return {
@@ -241,10 +251,10 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.searchImages(params);
-        const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        const content = formatMCPResponse(result, params.process_images !== false);
         
         return {
-          content: [{ type: "text", text: resultText }]
+          content
         };
       } catch (error: any) {
         return {
@@ -268,10 +278,10 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.searchVideos(params);
-        const resultText = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        const content = formatMCPResponse(result, params.process_images !== false);
         
         return {
-          content: [{ type: "text", text: resultText }]
+          content
         };
       } catch (error: any) {
         return {
