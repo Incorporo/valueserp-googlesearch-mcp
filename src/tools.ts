@@ -208,6 +208,22 @@ const placesSearchParamsSchema = z.object({
   process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
 });
 
+const placeDetailsParamsSchema = z.object({
+  // Either data_id OR data_cid is required (mutually exclusive)
+  data_id: z.string().optional().describe("Google Places data ID - retrieves data through Google Places with more profile information (format: 0x87b7122bd8e99a89:0xf20c18461109b2c0)"),
+  data_cid: z.string().optional().describe("Google Maps data CID - retrieves data through Google Maps with limited profile information"),
+  
+  // Output format
+  output: z.enum(["csv", "json"]).default("csv").optional().describe("Output format: csv (compact) or json (full data)"),
+  csv_fields: z.string().optional().describe("Comma-separated CSV fields for output selection. Available fields include: place_details.title, place_details.type, place_details.address, place_details.phone, place_details.website, place_details.rating, place_details.reviews, place_details.description, place_details.hours, place_details.gps_coordinates.latitude, place_details.gps_coordinates.longitude"),
+  
+  // Language
+  hl: z.string().optional().describe("Language code for UI language (default: en)"),
+  
+  // MCP Image Processing
+  process_images: z.boolean().default(true).optional().describe("Automatically detect and convert base64 images in API responses to MCP image resources (default: true)")
+});
+
 export function registerSearchTools(server: McpServer, client: ValueSerpClient) {
   // Default CSV fields for each search type
   const DEFAULT_CSV_FIELDS = {
@@ -215,7 +231,8 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
     news: 'news_results.title,news_results.source,news_results.date,news_results.link,news_results.snippet',
     images: 'image_results.position,image_results.title,image_results.image,image_results.link,image_results.source.name',
     videos: 'video_results.position,video_results.title,video_results.link,video_results.length,video_results.source',
-    places: 'places_results.position,places_results.title,places_results.address,places_results.phone,places_results.rating,places_results.reviews,local_results.title,local_results.address,local_results.rating,local_results.reviews'
+    places: 'places_results.position,places_results.title,places_results.address,places_results.phone,places_results.rating,places_results.reviews,local_results.title,local_results.address,local_results.rating,local_results.reviews',
+    place_details: 'place_details.title,place_details.type,place_details.address,place_details.phone,place_details.website,place_details.rating,place_details.reviews,place_details.description'
   };
 
   // Google Search Tool
@@ -343,6 +360,45 @@ export function registerSearchTools(server: McpServer, client: ValueSerpClient) 
         }
         
         const result = await client.searchPlaces(params);
+        const content = formatMCPResponse(result, params.process_images !== false);
+        
+        return {
+          content
+        };
+      } catch (error: any) {
+        return {
+          content: [{ type: "text", text: `Error: ${error.message}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // Google Place Details Tool
+  server.tool(
+    "google_place_details",
+    placeDetailsParamsSchema.shape,
+    async (args: any, _extra: any) => {
+      try {
+        // Validate that either data_id or data_cid is provided
+        if (!args.data_id && !args.data_cid) {
+          return {
+            content: [{ type: "text", text: "Error: Either data_id or data_cid must be provided" }],
+            isError: true
+          };
+        }
+        
+        const params = { 
+          output: 'csv', 
+          search_type: 'place_details',
+          ...args 
+        };
+        
+        if (params.output === 'csv' && !params.csv_fields) {
+          params.csv_fields = DEFAULT_CSV_FIELDS.place_details;
+        }
+        
+        const result = await client.getPlaceDetails(params);
         const content = formatMCPResponse(result, params.process_images !== false);
         
         return {

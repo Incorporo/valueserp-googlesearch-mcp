@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { ValueSerpConfig, ValueSerpResponse, SearchParams, NewsSearchParams, ImageSearchParams, VideoSearchParams, PlacesSearchParams } from './types.js';
+import { ValueSerpConfig, ValueSerpResponse, SearchParams, NewsSearchParams, ImageSearchParams, VideoSearchParams, PlacesSearchParams, PlaceDetailsParams } from './types.js';
 
 export class ValueSerpClient {
   private config: ValueSerpConfig;
@@ -69,6 +69,10 @@ export class ValueSerpClient {
   }
 
   async searchPlaces(params: PlacesSearchParams): Promise<ValueSerpResponse | string> {
+    return this.makeRequest('/search', params);
+  }
+
+  async getPlaceDetails(params: PlaceDetailsParams): Promise<ValueSerpResponse | string> {
     return this.makeRequest('/search', params);
   }
 }

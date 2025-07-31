@@ -57,6 +57,16 @@ export interface PlacesSearchParams extends Omit<SearchParams, 'include_ai_overv
   search_type: 'places';
 }
 
+export interface PlaceDetailsParams {
+  search_type: 'place_details';
+  data_id?: string;
+  data_cid?: string;
+  hl?: string;
+  output?: 'csv' | 'json';
+  csv_fields?: string;
+  process_images?: boolean;
+}
+
 export interface ValueSerpResponse {
   search_metadata: {
     id: string;
@@ -146,4 +156,36 @@ export interface ValueSerpResponse {
     type?: string;
     phone?: string;
   }>;
+  place_details?: {
+    title?: string;
+    type?: string;
+    address?: string;
+    phone?: string;
+    website?: string;
+    rating?: number;
+    reviews?: number;
+    description?: string;
+    hours?: Record<string, string>;
+    opening_hours?: {
+      [day: string]: {
+        open: string;
+        close: string;
+      };
+    };
+    order?: {
+      [platform: string]: string;
+    };
+    menu?: string;
+    reservations?: string;
+    people_also_search_for?: Array<{
+      title: string;
+      link: string;
+    }>;
+    gps_coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+    data_id?: string;
+    data_cid?: string;
+  };
 }
