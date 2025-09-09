@@ -7,6 +7,7 @@
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue?style=for-the-badge)](https://modelcontextprotocol.io/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=for-the-badge&logo=node.js)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![npm version](https://img.shields.io/npm/v/@incorporo/valueserp-mcp?style=for-the-badge&label=npm)](https://www.npmjs.com/package/@incorporo/valueserp-mcp)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 
 *Powered by [ValueSerp API](https://valueserp.com) • Built with [Model Context Protocol](https://modelcontextprotocol.io/)*
@@ -94,6 +95,12 @@ npm install -g @incorporo/valueserp-mcp
 npx @incorporo/valueserp-mcp
 ```
 
+Check version:
+
+```bash
+valueserp-mcp --version  # prints 1.0.0
+```
+
 Set your API key (required):
 
 ```bash
@@ -146,6 +153,48 @@ Add to your Claude Desktop configuration:
   }
 }
 ```
+
+  ---
+
+  ## 📦 Published Package
+
+  The server is published to npm as `@incorporo/valueserp-mcp`.
+
+  ```
+  name:     @incorporo/valueserp-mcp
+  version:  1.0.0
+  files:    dist/*.js + types, README, LICENSE
+  size:     ~33 kB (compressed)
+  ```
+
+  Verify from your environment:
+
+  ```bash
+  npm view @incorporo/valueserp-mcp version
+  ```
+
+  Upgrade to the latest version anytime:
+
+  ```bash
+  npm install -g @incorporo/valueserp-mcp@latest
+  ```
+
+  Or run on-demand without global install:
+
+  ```bash
+  npx @incorporo/valueserp-mcp
+  ```
+
+  ---
+
+  ## 🗒️ Changelog
+
+  ### 1.0.0
+  - Initial public release on npm
+  - CLI executable (`valueserp-mcp`) with stdio transport
+  - Search tools: web, news, images, videos, places, place details
+  - Automatic base64 image extraction to MCP image blocks
+
 
 ---
 
