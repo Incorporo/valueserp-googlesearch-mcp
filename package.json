@@ -1,9 +1,12 @@
 {
-  "name": "valueserp-mcp-server",
+  "name": "@incorporo/valueserp-mcp",
   "version": "1.0.0",
   "description": "MCP Server for ValueSerp Google Search API",
   "type": "module",
   "main": "dist/server.js",
+  "bin": {
+    "valueserp-mcp": "dist/server.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
@@ -25,6 +28,13 @@
     "vitest": "^1.0.0"
   },
   "keywords": ["mcp", "valueserp", "google", "search", "api"],
+  "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "",
   "license": "MIT"
 }

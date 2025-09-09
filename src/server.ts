@@ -17,14 +17,12 @@ export class ValueSerpMcpServer {
 
     this.client = new ValueSerpClient({ apiKey });
 
-    this.server = new McpServer({
-      name: 'valueserp-mcp-server',
-      version: '1.0.0',
-      capabilities: {
-        tools: {},
-        logging: {}
-      }
-    });
+    // Use legacy two-argument signature for test compatibility so internal fields like
+    // _serverInfo and _options exist (tests rely on these underscored props).
+    this.server = new McpServer(
+      { name: 'valueserp-mcp-server', version: '1.0.0' },
+      { capabilities: { tools: {}, logging: {} } }
+    );
 
     this.setupTools();
   }
@@ -35,7 +33,7 @@ export class ValueSerpMcpServer {
 
   async start() {
     const transport = new StdioServerTransport();
-    await this.server.connect(transport);
+  await this.server.connect(transport);
     console.error('ValueSerp MCP Server running on stdio');
   }
 }

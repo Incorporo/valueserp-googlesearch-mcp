@@ -81,7 +81,32 @@ Node.js 18+
 ValueSerp API Key (get free at valueserp.com)
 ```
 
+git clone <repository-url>
 ### **Installation**
+
+#### Easiest: Use the published npm package (recommended)
+
+```bash
+# Install globally
+npm install -g @incorporo/valueserp-mcp
+
+# OR run directly without installing
+npx @incorporo/valueserp-mcp
+```
+
+Set your API key (required):
+
+```bash
+export VALUESERP_API_KEY="your_api_key_here"
+```
+
+Then run (if installed globally):
+
+```bash
+valueserp-mcp
+```
+
+#### Manual (clone & build)
 
 ```bash
 # 1. Clone the repository
@@ -113,8 +138,7 @@ Add to your Claude Desktop configuration:
 {
   "mcpServers": {
     "valueserp": {
-      "command": "node",
-      "args": ["/path/to/valueserp-mcp/dist/server.js"],
+      "command": "valueserp-mcp",
       "env": {
         "VALUESERP_API_KEY": "your_api_key_here"
       }
